@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>The battle Between Human and LLMs</title>
+<style>
+body {
+  font-family: "Times New Roman", Georgia, serif;
+  line-height: 1.6;
+  color: #333;
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #f9f9f9;
+  position: relative;
+  overflow-x: hidden;
+}
+ /* HORIZONTAL TOP-LEFT Navigation Bar */
+.top-nav {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 10px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  padding: 8px 12px;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  max-width: calc(100% - 40px);
+  overflow-x: auto;
+  white-space: nowrap;
+}
+ .top-nav h3 {
+  margin: 0 10px 0 0;
+  padding-right: 10px;
+  border-right: 1px solid #eaeaea;
+  font-size: 14px;
+  color: #4361ee;
+}
+ .nav-item {
+  display: inline-block;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #333;
+  font-size: 12px;
+  text-align: center;
+  transition: all 0.3s ease;
+  border-bottom: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+ .nav-item:hover {
+  background: #4361ee;
+  color: white;
+  transform: translateY(-2px);
+  border-bottom: 2px solid #3a56d4;
+}
+ .nav-item.active {
+  background: #4361ee;
+  color: white;
+  border-bottom: 2px solid #3a56d4;
+  font-weight: bold;
+}
+ .nav-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: 0.5s;
+}
+ .nav-item:hover::before {
+  left: 100%;
+}
+ /* Page content container */
+.page-container {
+  margin-top: 80px;
+}
+ .page-content {
+  display: none;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+ .page-content.active {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+ /* Emoji background layer */
+.emoji-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  opacity: 0.5;
+  pointer-events: none;
+  overflow: hidden;
+}
+ .emoji-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: flex-start;
+  width: 100%;
+  height: 100%;
+  font-size: 24px;
+  line-height: 1.5;
+  transform: rotate(-5deg);
+}
+ .emoji {
+  margin: 10px 15px;
+  animation: float 20s infinite linear;
+}
+ @keyframes float {
+  0% {
+    transform: translateY(1) rotate(0deg);
+  }
+  100% {
+    transform: translateY(-1000px) rotate(360deg);
+  }
+}
+
+
+
+
+.paper {
+  background: rgba(255, 255, 255, 0.92);
+  padding: 60px 50px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  min-height: calc(100vh - 120px);
+  position: relative;
+  z-index: 1;
+}
+
+
+
+
+h1 {
+  font-size: 28px;
+  text-align: center;
+  margin-bottom: 40px;
+  line-height: 1.3;
+}
+
+
+
+
+h2 {
+  font-size: 18px;
+  margin-top: 30px;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 5px;
+}
+
+
+
+
+h3 { font-size: 16px; margin-top: 20px; }
+p { text-align: justify; margin: 12px 0; }
+ul, ol { margin: 15px 0; padding-left: 40px; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 25px 0;
+}
+th, td {
+  border: 1px solid #999;
+  padding: 10px;
+  text-align: left;
+}
+th {
+  background-color: #f0f0f0;
+}
+figure {
+  margin: 30px 0;
+  text-align: center;
+}
+figcaption {
+  font-style: italic;
+  margin-top: 10px;
+  color: #555;
+}
+.abstract {
+  background: #f8f9fa;
+  padding: 20px;
+  border-left: 4px solid #4361ee;
+  margin: 30px 0;
+  font-style: italic;
+}
+.toc {
+  margin: 40px 0;
+  padding: 20px;
+  background: #f5f5f5;
+  border: 1px dashed #ccc;
+}
+.toc ul { list-style: none; padding-left: 0; }
+.toc li { margin: 8px 0; }
+.references {
+  font-size: 0.95em;
+}
+.references p {
+  text-align: left;
+  hanging-indent: 1.5em;
+  text-indent: -1.5em;
+  margin: 10px 0;
+}
+ /* Emoji decorations within content */
+.emoji-decor {
+  font-size: 20px;
+  margin: 0 5px;
+  opacity: 0.7;
+}
+ .ai-emoji {
+  color: #4361ee;
+}
+ .edu-emoji {
+  color: #4cc9f0;
+}
+ .tech-emoji {
+  color: #7209b7;
+}
+ /* Back to top button */
+.back-to-top {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: #4361ee;
+  color: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-size: 24px;
+  box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 999;
+}
+ .back-to-top.visible {
+  opacity: 1;
+  visibility: visible;
+}
+ .back-to-top:hover {
+  background: #3a56d4;
+  transform: translateY(-5px);
+}
+ @media print {
+  body { background: white; margin: 0; }
+  .paper { box-shadow: none; padding: 40px; background: white; }
+  .emoji-background { display: none; }
+  .top-nav { display: none; }
+  .back-to-top { display: none; }
+  .page-container { margin-top: 0; }
+}
+ @media (max-width: 1200px) {
+  .top-nav {
+    left: 10px;
+    right: 10px;
+    max-width: calc(100% - 20px);
+    padding: 6px 10px;
+  }
+   .nav-item {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+   .paper {
+    padding: 50px 30px;
+  }
+   .page-container {
+    margin-top: 70px;
+  }
+}
+ @media (max-width: 768px) {
+  .top-nav {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 5px 8px;
+  }
+   .top-nav h3 {
+    font-size: 12px;
+    padding-right: 8px;
+    margin-right: 8px;
+  }
+   .nav-item {
+    padding: 5px 8px;
+    font-size: 10px;
+    min-width: 80px;
+  }
+   .paper {
+    padding: 40px 20px;
+    margin-top: 10px;
+  }
+   .page-container {
+    margin-top: 60px;
+  }
+   body {
+    margin: 60px auto 20px;
+    padding: 10px;
+  }
+   h1 {
+    font-size: 22px;
+    margin-top: 20px;
+  }
+}
+ @media (max-width: 480px) {
+  .top-nav {
+    top: 5px;
+    left: 5px;
+    right: 5px;
+  }
+   .top-nav h3 {
+    display: none;
+  }
+   .nav-item {
+    padding: 4px 6px;
+    font-size: 9px;
+    min-width: 70px;
+  }
+   .page-container {
+    margin-top: 50px;
+  }
+   .paper {
+    padding: 30px 15px;
+  }
+}
+
+/* Container to keep things neat (optional but recommended) */
+    .image-container {
+      position: relative;
+      border-radius: 12px;
+      background-color: white;
+      padding: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      max-width: 500px;
+      width: 100%;
+    }
+
+    /* The magic happens here */
+    .zoom-hover {
+      display: block;
+      width: 100%;                  /* Adjust size as needed */
+      transition: transform 0.4s ease;  /* Smooth zoom animation */
+    }
+
+    .image-container:hover .zoom-hover {
+      transform: scale(1.15);       /* Makes image 15% bigger on hover */
+      box-shadow: 0 15px 30px rgba(0,0,0,0.3); /* Stronger shadow on hover */
+    }
+
+
+</style>
+</head>
+
+
+
+
+<body>
+<!-- HORIZONTAL TOP-LEFT Navigation Bar -->
+<nav class="top-nav">
+<div class="nav-item active" data-page="introduction">Introduction</div>
+<div class="nav-item" data-page="methodology">Methodology</div>
+<div class="nav-item" data-page="results">Results</div>
+<div class="nav-item" data-page="discussion">Discussion</div>
+<div class="nav-item" data-page="conclusion">Conclusion</div>
+<div class="nav-item" data-page="declaration">Declaration</div>
+</nav>
+
+
+
+
+<!-- Emoji Background -->
+<div class="emoji-background" id="emojiBg"></div>
+
+
+
+
+<!-- Back to top button -->
+<a href="#" class="back-to-top" id="backToTop">↑</a>
+
+
+
+
+<!-- Page Container -->
+<div class="page-container">
+ <!-- Introduction Page -->
+<div class="page-content active" id="introduction-page">
+  <div class="paper">
+  
+    <hr style="margin:60px 0; border:1px solid #ccc;">
+    <!-- Main Content -->
+    <h1><span class="emoji-decor">👋🏻👋🏼👋🏽👋🏾👋</span>~WELCOME~ <span class="emoji-decor">👋🏻👋🏼👋🏽👋🏾👋</span></h1>
+    <p>Emojis contain are a variety of graphics, including faces with emotions, animate and inanimate objects, actions of humans and symbols. Nowadays, the usage of emojis has been becoming increasingly common among internet users. Yet, it is questioned if AI models can catch up with the trend and show a similar preference as humans choosing their emojis used in texts. Our group's hypothesis is AI models are not yet able to match human preferences of emoji selection. The following part of this website will show details of our investigation on choices and perceptual difference between humans and AI models, with the involvement of emojis within sentiments.</p>
+  
+    <p>This website presents a systematic analysis of emoji usage between human👥 and LLM🤖</p>
+    <ol>
+      <li>How LLM responses differ from human responses? <span class="emoji-decor">📈</span></li>
+      <li>What are the primary reasons behind these differences?<span class="emoji-decor">🚧</span></li>
+    </ol>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+<!-- Methodology Page -->
+<div class="page-content" id="methodology-page">
+  <div class="paper">
+    <h1>Methodology <span class="emoji-decor">🔬</span></h1>
+        
+    <div class="abstract">
+
+
+
+
+      <h2>HOW WE DO IT 🧐</h2>
+      <p>Step 1: We typed in prompts for the AI to generate answers
+        <p>Step 2: Expected result are:</p>
+        <p>1. Combinations of emojis (Part 1) </p>
+          <p>2. Analysis of sentiment tones (Part 2)</p>
+    </div>
+  
+    <img src="table.png" alt="table" style="max-width:105%; height:auto;">
+    <figcaption> Figure 1. Prompts for generating responses from LLM <span class="emoji-decor">📈</span> </figcaption>
+    </prompt>
+
+
+
+
+    <div class="abstract">
+      <h2>After the result collection ...... 🧐</h2>
+<p>1. Remove the answers that were garbled text or non-sensible answers, i.e. answers that were not related to the prompts, we had selected 8 AI from 3 models in total.
+<h3>The selected models: Qwen 2.5 1.5B, Qwen 2.5 14B, Qwen 2.5 3B, Qwen 2.5 7B, Gemma 3 1B, Gemma 3 4B, Yi 1.5 6B, and Yi 1.5 9B. </h2>
+<p>2. Compare the answers from model to human perspective of emojis, which emojis were selected by our group members and a few colleagues. Graphs and text description in the following parts will present the results from our study.</p>
+<figure></p>
+</figure>
+  
+
+<div class="image-container">
+ <img src="Qwen_Logo.svg.png" alt="QWEN"  class="zoom-hover" style="max-width:35%; height:auto;"> 
+</div>
+
+<div class="image-container">
+ <img src="gemma-color.png" alt="gemma" class="zoom-hover"  style="max-width:25%; height:auto;">
+ </div>
+ <div class="image-container">
+ <img src="Yi_logo_icon_light.svg" alt="yi" class="zoom-hover"  style="max-width:30%; height:auto;">
+ </div>
+
+
+
+
+ <figcaption> Figure 2. Three LLM Models used for generating responses <span class="emoji-decor">📋</span></figcaption>
+</figure>
+</div>
+  </div>
+</div>
+
+
+<!-- Results Page -->
+ <div class="page-container">
+<div class="page-content" id="results-page">
+  <div class="paper">
+    <h1>Results <span class="emoji-decor">📊</span></h1>
+
+
+
+
+    <h2><span class="emoji-decor">⚔️</span>Part 1: HUMAN VS LLM - Emoji category distribution<span class="emoji-decor">⚔️</span></h2>
+    <h3>Emojis are grouped into ✌🏻 categories:</h3>
+  
+    <table>
+      <thead>
+        <tr>
+          <th>Emotion</th>
+          <th>Non-emotion</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>🥳🥰🧐🤩🥴🫡😬🥺☺️🤓😻😘😢😔😕😟😊😞🥲🥹😭😏😉😥😢😓😠😒🙂‍↕️🙄😧🧐😬😅😫☹️😂🙁😄😍🤨😤😆😄😁😩😡😴😎😌😈💀🙅🙇🏻‍♀️🙇🙋💆🙏🙏🏼🙏🏻👍👍🏻🫶🏻💪👎🤘🤘🏻👏👊✌🏻👋👋🏼👌💖❤️💔💕💞🎉🎊❓🚫❗✅⚠️🫂👀🔥💥💬🕺🏼💃💅💅🏻👑💯💤</td>
+          <td>💍🎈🎟️🗓️🌹🕒🕑📢👤🎁✨👘👰💐🎂👩💼👨🍫💼👰♀️👧🍾👭👫♂️☀️🌧️⛈️🩹🏖️🌿📖🌴🍹🌼🌸🚀📍🏠➡️🌱🔥🚪👠🎤🏆🌊🌷🍵💉🌸📽️🍿📺🌞📡❄️🛌🎬🎮☕️🌃🔗🌌⚙️👫🍎🍉👦🌟💫🎤🍌🍑💦🍷🍦🏃🚶💨🔔🚍🍀📅💋⚂🚶🏃🕰️🛋️👉👈</td>
+        </tr>
+      </tbody>
+    </table>
+
+
+    <h2><span class="emoji-decor">📊</span>Bar chart<span class="emoji-decor">📊</span></h2>
+    <div class="image-container">
+      <img src="Bar chart (human).png" alt="table" class="zoom-hover" style="max-width:105%; height:auto;">
+     <figcaption style="text-align:right; font-style:italic;">Bar chart 1. Category distribution in Human response<span class="emoji-decor">📋</span></figcaption>
+</div>
+
+
+ <div class="image-container">
+      <img src="Bar chart (LLM).png" alt="table" class="zoom-hover"  style="max-width:105%; height:auto;">
+     <figcaption style="text-align:right; font-style:italic;">Bar chart 2. Category distribution in LLM response<span class="emoji-decor">📋</span></figcaption>
+
+</div>
+
+
+      <h2><span class="emoji-decor">⚔️</span>Part 2: LLM - Sentiment classification<span class="emoji-decor">⚔️</span></h2>
+          <div class="image-container">
+  
+      <img src="3.png" alt="table" class="zoom-hover"  style="max-width:100%; height:auto;">
+          </div>
+     <figcaption style="text-align:right; font-style:italic;">Bar chart 3. Sentiment classification per sentence: AI perspective<span class="emoji-decor">📋</span></figcaption>
+
+
+  </div>
+</div>
+
+
+
+
+<!-- Discussion Page -->
+<div class="page-content" id="discussion-page">
+  <div class="paper">
+    <h1>Discussion <span class="emoji-decor">💭</span></h1>
+  
+    <div class="abstract">
+    <h2>⭐ Part 1: Key insights ⭐ </h2>
+    <li>Human participants: a strong preference for emotion-based emojis (68% of selections) ⚖️ </li>
+     <li>LLMs: more balanced distribution between emotional and non-emotional emojis (52% emotional, 48% non-emotional) ⚖️</li>
+        </div>
+
+
+     <div style="background: #f3e5f5; padding: 20px; border-radius: 20px;">
+        <h3 style="color: #7b1fa2; text-align: center;font-size: 30px;">-Examples-</h3>
+        <p style="font-weight:bold; ;font-size: 18px;">Text 2: "I heard that you are having a bad day. How are you feeling now?" </p>
+        <table>
+      <thead>
+        <tr>
+          <th >Human (Emotion expressed)</th>
+          <th>LLMs (Concrete things illustrated)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr >
+          <td>👀: Concern <br>🫂: Support <br>🥲: Emotional & Sad<br>🥹: Empathic</td>
+          <td>➡️ (e.g. 😔➡️❤️➡️😊):  changes of feelings <p>(e.g. From sad to cheerful)</p>
+         </li><br>❓ (e.g.😊❤️❓😔❓😟🙏❓): showing doubt </li> <p>(e.g. Asking about others feeling)</p>
+         </td>
+
+
+        </tr>
+      </tbody>
+    </table>
+      <p style="font-weight:bold;font-size: 18px;">Text 3: "I'm sorry for what I’ve said earlier today."  </p>
+  <table>
+      <thead>
+        <tr>
+          <th>Human (Emotion expressed)</th>
+          <th>LLMs (Concrete things illustrated)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>🙏 🙏🏻: Politeness <br>🙇🏻‍♀️: Apology<br>🥲 & 😭: Regret<br>🥹: Guilt</td>
+          <td>🙅:  Showing what he/she did earlier was wrong <br>♀️♂️: Relationship between<br>🙋: Showing responsibility on what he/she did earlier</li>
+         </td>
+        </tr>
+
+
+       </tr>
+      </tbody>
+    </table>
+      <p style="font-weight:bold;font-size: 18px;">Text 5: "That’s very mean of you to say!"</p>
+  <table>
+      <thead>
+        <tr>
+          <th>Human (Emotion expressed)</th>
+          <th>LLMs (Concrete things/messages illustrated)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>💀: Disgusted<br>🤨: Shocked & Suspicious<br>😡: Angry<br>😅: Awkward<br>😤: Offended<br>😂: Dumbfounding</td>
+          <td>👏: Ironic – criticizing <br>🚫🙅: Something that is incorrect<br>👎: Something that is bad
+         </td>
+        </tr>
+
+
+      </tbody>
+    </table>
+     </div>
+
+
+          <div class="abstract">
+    <h2>⭐ Part 2: Key insights ⭐ </h2>
+    <li>AI models often identify emojis based solely on their visual appearance 🫥</li>
+     <li>AI models often fail to recognize the sarcasm and irony used by the user 😵‍💫 </li>
+          </div>
+     <div style="background: #e3f2fd; padding: 20px; border-radius: 20px;">
+        <h3 style="color: #1565c0; text-align: center; font-size: 30px;">-Examples-</h3>
+        <p style="font-weight:bold;font-size: 18px;">Sentence: "You deserve it 🙃" </p>
+  </tr>
+      </tbody>
+    </table>
+  <table>
+      <thead>
+        <tr>
+          <th>Expected sentiment</th>
+          <th>LLMs responses</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="text-align: center; color: crimson;">Negative</td>
+          <td style="color: #2e7d32;">Positive/neutral <p style="color: #333;"> 💬 Qwen 2.5: Conveying happiness, supportive and approval</p>
+           <p style="color: #333;"> 💬 Gemma 3 1b: Sense of encouragement </p>
+           <p style="color: #333;"> 💬 Yi 1.5 9b: Hint of playfulness or light-heartedness </p>
+         </td>
+        </tr>
+
+
+   </tr>
+      </tbody>
+    </table>
+      <p style="font-weight:bold;font-size: 18px;">Sentence: "Sure why not 🤡"</p>
+  <table>
+      <thead>
+        <tr>
+          <th>Expected sentiment</th>
+          <th>LLMs responses</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="text-align: center; color: crimson;">Negative</td>
+          <td style="color: #2e7d32;">Positive <p style="color: #333;"> 💬 Qwen 2.5 14B: 🤡 → suggests a touch of amusement or playfulness</p>
+           <p style="color: #333;"> 💬 Qwen 2.5 3b: Sense of appreciation  </p>
+           <p style="color: #333;"> 💬 Yi 1.5 9b: 🤡 → a playful, or slightly mischievous twist to the agreement  </p>         
+           <p style="color: #333; font-weight: bolder; font-size: 20px;">However, some have resulted: </p> <p style="color: crimson;">Negative</p> <p style="color: #333;"> 💬 Gemma 3 1b: Disbelief and sarcasm
+           <p style="color: #333;"> 💬 Gemma 3 4b: Sarcastic and foolish  </p>
+         </td>
+        </tr>
+      </tbody>
+    </table>
+     </div>
+     </div>
+</div>
+
+
+
+
+<!-- Conclusion Page -->
+<div class="page-content" id="conclusion-page"> 
+  <div class="paper"> 
+    <h1>What is the conclusion? <span class="emoji-decor">✅</span></h1>
+     <div style="background: #fff8e1; padding: 25px; border-radius: 8px; margin: 30px 0; border-left: 5px solid #ffb300;">
+      <p style="text-align: center; font-size: 20px;"><strong>-AI take texts literally without noticing implications-</strong></p>
+      <p>In sentiments that humans wrote out of implicating ideas subtly, for example, apologizing to someone ("I'm sorry for what I’ve said earlier today.), humans chooses emojis that adds sincereness by using apologetic emojis to the text (🙇🏻‍♀️🙏🏻), where AI took it literal and only use emoji as aid to express meaning of text (🙅🙋).
+</p>
+   </div>
+  
+
+
+    <div style="background: #fff8e1; padding: 25px; border-radius: 8px; margin: 30px 0; border-left: 5px solid #8A9A5B;">
+      <p style="text-align: center; font-size: 20px;"><strong>-AI is highly text-based instead of context-based-</strong></p>
+   <p>In sentiments that humans agree on to interpret conveying negative meaning, AI would not understand the social cues from humans poorly. An example is shown in part 2, when a joking clown face is added at the end of an agreement (Sure why not 🤡), AI would depend on text instead of interpreting the emoji along with text.</p>
+     </div>
+
+   <div style="background: #fff8e1; padding: 25px; border-radius: 8px; margin: 30px 0; border-left: 5px solid #9fdfe0;">
+      <p style="text-align: center; font-size: 20px;"><strong>-AI is still not having a consensus in emoji interpretation with humans-</strong></p>
+<p> 🤡 to humans is interpreted as a clown face, or as adding a joking tone, when AI (Yi 1.5 9B) would interpret as ‘juggler with knives’.</p>
+     </div> </div> </div>
+
+
+<!-- Declaration Page -->
+
+<div class="page-content" id="declaration-page"> 
+  <div class="paper">
+    <h1>Declaration <span class="emoji-decor">✏️</span></h1>
+    <div style="background: #fff8e1; padding: 25px; border-radius: 8px; margin: 30px 0; border-left: 5px solid #ffb300;">
+         <p style="text-align: center; font-size: 20px;"><strong>-Declaration of the use of GenAI:-</strong></p>
+            <p>Gen AI is used to generate the following material:
+             <ul>
+  <li><a href="Human response.csv" download>Human response.csv</a></li>
+
+
+    <li><a href="ALLTO.py" download>ALLTO.py</a> </li>
+
+    <li><a href="Humancombined.csv" download>Humancombined.csv</a> </li>
+ 
+     <li> <a href="Human_response_final.csv" download>Human_response_final.csv</a></li>
+
+      <li><a href="1-10only.csv" download>1-10only.csv</a> </li>
+  
+  
+     <li> <a href="Bar chart (human).png" download>Bar chart (human).png</a> </li>
+
+     <li> <a href="Bar chart (LLM).png" download>Bar chart (LLM).png</a> </li>
+
+     <li> <a href="humanbar.py" download>humanbar.py</a> </li>
+
+     <li> <a href="LLMbar.py" download>LLMbar.py</a> </li>
+
+  </ul>
+
+
+            </p>
+    </div> 
+
+       <div style="background: #fff8e1; padding: 25px; border-radius: 8px; margin: 30px 0; border-left: 5px solid #9fdfe0;">
+
+         <p style="text-align: center; font-size: 20px;"><strong>-Excel is used to generate the following graph:-</strong></p>
+
+       <li> <a href="11-20 no an.csv" download>11-20 no an.csv</a></li>
+       <li> <a href="table.png" download>table.png</a></li>
+
+       </div>
+
+ <div style="background: #fff8e1; padding: 25px; border-radius: 8px; margin: 30px 0; border-left: 5px solid #e09f9f;">
+      <p style="text-align: center; font-size: 20px;"><strong>- Acknowledgements-</strong></p>
+<p> 🤡 <strong>Gloria</strong>: Graph, responses analysis <br>
+👩‍🎓<strong> Nicole</strong>: Graph, python, emoji categorisation, website design <br>
+🚀 <strong>Victoria</strong>: responses analysis, generate table <br>
+💡 <strong>Jonathan</strong>: python, csv combing, website design <br>
+
+
+</p>
+     </div> </div> </div>
+
+
+
+<script>
+// Generate emoji background
+document.addEventListener('DOMContentLoaded', function() {
+  const emojiBg = document.getElementById('emojiBg');
+  const emojiContainer = document.createElement('div');
+  emojiContainer.className = 'emoji-container';
+   // Education and AI related emojis
+  const emojis = [
+    '🤖', '👨‍🎓', '👩‍🎓', '👨‍🏫', '👩‍🏫', '📚', '📖', '📝', '✏️', '📋',
+    '🔬', '🧪', '💻', '📱', '🌐', '🧠', '📊', '📈', '📉', '🔍',
+    '💡', '⚡', '🔧', '🔨', '⚙️', '📡', '🧮', '🎓', '🏛️', '🏫',
+    '💭', '🗣️', '👥', '🤝', '🚀', '⭐', '🎯', '✅', '❌', '⚠️',
+    '⚖️', '🔒', '🔓', '❤️', '🧡', '💛', '💚', '💙', '💜', '🤎',
+    '❗', '❕', '❓', '❔', '‼️', '⁉️', '🔅', '🔆', '〽️', '⚠️',
+    '👶', '🧒', '👦', '👧', '🧑', '👨', '👩', '🧔', '👨‍🦰', '👩‍🦰',
+    '👨‍🦱', '👩‍🦱', '👨‍🦳', '👩‍🦳','👨‍🦲', '👩‍🦲', '👱', '👱‍♂️', '👱‍♀️', '🧓',
+    '👴', '👵', '🙍', '🙍‍♂️', '🙍‍♀️', '🙎', '🙎‍♂️', '🙎‍♀️','🙅', '🙅‍♂️',
+    '🙅‍♀️', '🙆', '🙆‍♂️', '🙆‍♀️', '💁', '💁‍♂️', '💁‍♀️', '🙋', '🙋‍♂️', '🙋‍♀️',
+    '🧏', '🧏‍♂️','🧏‍♀️', '🙇', '🙇‍♂️', '🙇‍♀️', '🤦', '🤦‍♂️', '🤦‍♀️', '🤷',
+    '🤷‍♂️', '🤷‍♀️', '👨‍⚕️', '👩‍⚕️', '👨‍🎓', '👩‍🎓','👨‍🏫', '👩‍🏫', '👨‍⚖️', '👩‍⚖️',
+    '👨‍🌾', '👩‍🌾', '👨‍🍳', '👩‍🍳', '👨‍🔧', '👩‍🔧', '👨‍🏭', '👩‍🏭', '👨‍💼', '👩‍💼',
+    '👨‍🔬', '👩‍🔬', '👨‍💻', '👩‍💻', '👨‍🎤', '👩‍🎤', '👨‍🎨', '👩‍🎨', '👨‍✈️', '👩‍✈️',
+    '👨‍🚀', '👩‍🚀', '👨‍🚒', '👩‍🚒','👮', '👮‍♂️', '👮‍♀️', '🕵️', '🕵️‍♂️', '🕵️‍♀️',
+    '💂', '💂‍♂️', '💂‍♀️', '🥷', '👷', '👷‍♂️', '👷‍♀️', '🤴','👸', '👳',
+    '👳‍♂️', '👳‍♀️', '👲', '🧕', '🤵', '🤵‍♂️', '🤵‍♀️', '👰', '👰‍♂️', '👰‍♀️',
+    '🤰', '🤱, 👼', '🎅', '🤶', '🦸', '🦸‍♂️', '🦸‍♀️', '🦹', '🦹‍♂️',
+    '🦹‍♀️', '🧙', '🧙‍♂️', '🧙‍♀️', '🧚', '🧚‍♂️','🧚‍♀️', '🧛', '🧛‍♂️', '🧛‍♀️',
+    '🧜', '🧜‍♂️', '🧜‍♀️', '🧝', '🧝‍♂️', '🧝‍♀️', '🧞', '🧞‍♂️', '🧞‍♀️', '🧟',
+    '🧟‍♂️', '🧟‍♀️', '💆', '💆‍♂️', '💆‍♀️', '💇', '💇‍♂️', '💇‍♀️','😀', '😃',
+    '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃',
+    '😉', '😌','😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛',
+    '😝', '😜', '🤪', '🤨', '🧐', '🤓','😎', '🥸', '🤩', '🥳',
+    '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖',
+    '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯',
+    '😳', '🥵', '🥶', '😱','😨', '😰', '😥', '😓', '🤗', '🤔',
+    '🤭', '🤫', '🤥', '😶', '😶‍🌫️', '😐', '😑', '😬','🙄', '😯',
+    '😴', '🤤', '😪', '😵', '😵‍💫', '🤐','🥴', '🤢', '🤮', '🤧',
+    '😷', '🤒', '🤕', '🤑', '🤠', '😦', '😧', '😮', '😮‍💨', '😲',
+    '🥱', '😈', '👿', '👹', '👺', '🤡','💩', '👻', '💀', '☠️',
+    '👽', '👾', '🤖', '🎃', '😺', '😸', '😹', '😻', '😼', '😽',
+    '🙀', '😿', '😾',];
+   // Create emojis with random positions and animation delays
+  for (let i = 100; i < 1000; i++) {
+    const emoji = document.createElement('span');
+    emoji.className = 'emoji';
+    emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+     // Randomize animation delay and duration
+    const delay = Math.random() * 0;
+    const duration = 15 + Math.random() * 25;
+     emoji.style.animationDelay = `${delay}s`;
+    emoji.style.animationDuration = `${duration}s`;
+     // Randomize starting position
+    emoji.style.position = 'absolute';
+    emoji.style.left = `${Math.random() * 100}%`;
+    emoji.style.top = `${Math.random() * 200}%`;
+     emojiContainer.appendChild(emoji);
+  }
+   emojiBg.appendChild(emojiContainer);
+   // Navigation functionality
+  setupNavigation();
+  setupBackToTop();
+});
+ // Setup navigation
+function setupNavigation() {
+  const navItems = document.querySelectorAll('.nav-item');
+  const pages = document.querySelectorAll('.page-content');
+   // Function to switch pages
+  function switchPage(pageId) {
+    // Hide all pages
+    pages.forEach(page => {
+      page.classList.remove('active');
+    });
+  
+    // Show selected page
+    const targetPage = document.getElementById(`${pageId}-page`);
+    if (targetPage) {
+      targetPage.classList.add('active');
+    }
+  
+    // Update active nav item
+    navItems.forEach(item => {
+      item.classList.remove('active');
+      if (item.getAttribute('data-page') === pageId) {
+        item.classList.add('active');
+      }
+    });
+  
+    // Update URL hash
+    window.location.hash = pageId;
+  
+    // Scroll to top of page
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }
+   // Add click event to nav items
+  navItems.forEach(item => {
+    item.addEventListener('click', function() {
+      const pageId = this.getAttribute('data-page');
+      switchPage(pageId);
+    });
+  });
+   // Check URL hash on page load
+  const hash = window.location.hash.substring(1);
+  if (hash && ['introduction', 'methodology', 'results', 'discussion', 'conclusion', 'references'].includes(hash)) {
+    switchPage(hash);
+  }
+}
+ // Setup back to top button
+function setupBackToTop() {
+  const backToTopBtn = document.getElementById('backToTop');
+   // Show/hide button on scroll
+  window.addEventListener('scroll', function() {
+    if (window.scrollY > 300) {
+      backToTopBtn.classList.add('visible');
+    } else {
+      backToTopBtn.classList.remove('visible');
+    }
+  });
+   // Smooth scroll to top
+  backToTopBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  });
+}
+</script>
+</body>
+</html>
+
